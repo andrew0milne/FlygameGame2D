@@ -5,8 +5,9 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    CharacterController cc;
-    public float speed = 0.2f;
+    Rigidbody rb;
+    public float acceleration = 5.0f;
+    public float max_speed = 3.0f;
     public GameObject body;
     public GameObject[] guns;
 
@@ -19,7 +20,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        cc = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
         weapon_choice = false;
     }
 
@@ -42,7 +43,10 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.W))
         {
-            cc.Move(mouse * speed);
+            //if (rb.velocity.magnitude < max_speed)
+            //{
+                rb.AddForce(body.transform.forward * acceleration);
+            //}
         }
 
         if(Input.GetKeyDown(KeyCode.E))
@@ -73,7 +77,7 @@ public class PlayerController : MonoBehaviour
     {
         GameObject temp_rocket;
         temp_rocket = Instantiate(heavy_weapon, transform.position + body.transform.forward * 2.0f, body.transform.rotation, null);
-        temp_rocket.SendMessage("Activate", cc.velocity);
+        temp_rocket.SendMessage("Activate", rb.velocity);
     }
 
     void FireGun()

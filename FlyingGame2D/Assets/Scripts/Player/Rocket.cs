@@ -45,10 +45,10 @@ public class Rocket : MonoBehaviour
     {
         if (!dead)
         {
-            if (rb.velocity.magnitude < max_speed)
-            {
+            //if (rb.velocity.magnitude < max_speed)
+            //{
                 rb.AddForce(transform.forward * acceleration);
-            }
+            //}
         }
         else
         {
