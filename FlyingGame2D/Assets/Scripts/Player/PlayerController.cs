@@ -1,12 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     CharacterController cc;
     public GameObject body;
+    public GameObject[] guns;
+
     public GameObject rocket;
+
+    public Text weapon_choise_text;
 
     bool weapon_choice;
 
@@ -35,14 +40,16 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.E))
         {
             weapon_choice = !weapon_choice;
+
         }
 
         if (weapon_choice)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                FireRocket();
+                FireHeavy();
             }
+            weapon_choise_text.text = "Heavy";
         }
         else
         {
@@ -50,17 +57,21 @@ public class PlayerController : MonoBehaviour
             {
                 FireGun();
             }
+            weapon_choise_text.text = "Machine Gun";
         }
     }
 
-    void FireRocket()
+    void FireHeavy()
     {
         
     }
 
     void FireGun()
     {
-
+        foreach(GameObject g in guns)
+        {
+            g.SendMessage("Activate");
+        }
     }
 
     // Update is called once per frame
