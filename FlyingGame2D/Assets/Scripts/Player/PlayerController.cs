@@ -6,10 +6,11 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     CharacterController cc;
+    public float speed = 0.2f;
     public GameObject body;
     public GameObject[] guns;
 
-    public GameObject rocket;
+    public GameObject heavy_weapon;
 
     public Text weapon_choise_text;
 
@@ -22,6 +23,11 @@ public class PlayerController : MonoBehaviour
         weapon_choice = false;
     }
 
+    void Move()
+    {
+
+    }
+
     void UserInput()
     {
         Vector3 mouse = Camera.main.ScreenToViewportPoint(Input.mousePosition);
@@ -30,11 +36,13 @@ public class PlayerController : MonoBehaviour
         mouse.z = mouse.y;
         mouse.y = 0.0f;
 
+        mouse = mouse.normalized;
+
         body.transform.LookAt(transform.position + mouse);
 
         if (Input.GetKey(KeyCode.W))
         {
-            cc.Move(mouse);
+            cc.Move(mouse * speed);
         }
 
         if(Input.GetKeyDown(KeyCode.E))
@@ -63,7 +71,9 @@ public class PlayerController : MonoBehaviour
 
     void FireHeavy()
     {
-        
+        GameObject temp_rocket;
+        temp_rocket = Instantiate(heavy_weapon, transform.position + body.transform.forward * 2.0f, body.transform.rotation, null);
+        temp_rocket.SendMessage("Activate", cc.velocity);
     }
 
     void FireGun()
