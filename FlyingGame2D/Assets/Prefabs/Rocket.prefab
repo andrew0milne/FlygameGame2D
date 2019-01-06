@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7607cdb54336a4f408a5fb1565fe5a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 2
+  acceleration: 5
   max_speed: 5
   direction: {x: 0, y: 0, z: 0}
 --- !u!199 &4128838872053879189

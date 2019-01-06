@@ -15,6 +15,9 @@ public class PlayerController : MonoBehaviour
 
     public Text weapon_choise_text;
 
+    ParticleSystem trail;
+    ParticleSystem.EmissionModule trail_em;
+
     bool weapon_choice;
 
     // Start is called before the first frame update
@@ -22,6 +25,10 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         weapon_choice = false;
+
+        trail = body.GetComponent<ParticleSystem>();
+        trail_em = trail.emission;
+        trail_em.rateOverTime = 0.0f;
     }
 
     void Move()
@@ -31,22 +38,27 @@ public class PlayerController : MonoBehaviour
 
     void UserInput()
     {
-        Vector3 mouse = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        mouse -= new Vector3(0.5f, 0.5f, 0.0f);
+        //Vector3 mouse = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+        //mouse -= new Vector3(0.5f, 0.5f, 0.0f);
 
-        mouse.z = mouse.y;
-        mouse.y = 0.0f;
+        //mouse.z = mouse.y;
+        //mouse.y = 0.0f;
 
-        mouse = mouse.normalized;
+        //mouse = mouse.normalized;
 
-        body.transform.LookAt(transform.position + mouse);
+        Vector3 mouse = Input.mousePosition;
+        mouse.z = 20.0f;
+        mouse = Camera.main.ScreenToWorldPoint(mouse);
 
+        //mouse = mouse.normalized;
+
+        body.transform.LookAt(mouse);
+
+        trail_em.rateOverTime = 0.0f;
         if (Input.GetKey(KeyCode.W))
         {
-            //if (rb.velocity.magnitude < max_speed)
-            //{
-                rb.AddForce(body.transform.forward * acceleration);
-            //}
+            rb.AddForce(body.transform.forward * acceleration);
+            trail_em.rateOverTime = 100.0f;
         }
 
         if(Input.GetKeyDown(KeyCode.E))
