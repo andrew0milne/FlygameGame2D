@@ -20,6 +20,8 @@ public class PlayerController : MonoBehaviour
 
     bool weapon_choice;
 
+    public GameObject test;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -89,7 +91,7 @@ public class PlayerController : MonoBehaviour
     {
         GameObject temp_rocket;
         temp_rocket = Instantiate(heavy_weapon, transform.position + body.transform.forward * 2.0f, body.transform.rotation, null);
-        temp_rocket.SendMessage("Activate", rb.velocity);
+        temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, test);
     }
 
     void FireGun()
@@ -104,5 +106,14 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         UserInput();
+
+        float pos = 90.0f - Vector3.Angle(transform.right, test.transform.position - transform.position);
+
+        //Debug.Log(pos);
+        
+        // if object is behind or infornt
+        //float pos2 = 90.0f - Vector3.Angle(transform.forward, test.transform.position - transform.position);
+
+       
     }
 }
