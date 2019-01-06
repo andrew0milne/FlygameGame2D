@@ -25,6 +25,7 @@ public class Rocket : MonoBehaviour
     void Start()
     {
         life_time = 0.0f;
+        
     }
 
     public void Activate(Vector3 vel, GameObject tar)
@@ -46,6 +47,7 @@ public class Rocket : MonoBehaviour
 
         rb.isKinematic = true;
         GetComponent<MeshRenderer>().enabled = false;
+        GetComponent<CapsuleCollider>().enabled = false;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -57,27 +59,32 @@ public class Rocket : MonoBehaviour
     {
         if (life_time < time_until_targetting)
         {
-            rb.AddForce(transform.forward * acceleration);
+            if (rb.velocity.magnitude < max_speed)
+            {
+                rb.AddForce(transform.forward * acceleration);
+            }
         }
         else
         {
-            rb.AddForce(transform.forward * acceleration);
-
+            if (rb.velocity.magnitude < max_speed)
+            {
+                rb.AddForce(transform.forward * acceleration);
+            }
 
             // DOESNT HIT THE TARGET PROPERLY, ORBITS AROUND IT A BIT
 
+            float angle = Vector3.Angle(rb.velocity, transform.forward);
+
             float pos = 90.0f - Vector3.Angle(transform.right, target.transform.position - transform.position);
             
-            if (pos > 1.0f)
+            if (pos > 0.0f)
             {
                 transform.Rotate(transform.up, rotate_speed * Time.deltaTime);
             }
-            else if(pos < 1.0f)
+            else if(pos < 0.0f)
             {
                 transform.Rotate(transform.up, -rotate_speed * Time.deltaTime);
-            }
-
-            
+            }    
         }
     }
 
@@ -102,5 +109,7 @@ public class Rocket : MonoBehaviour
                 Destroy(this.gameObject);
             }
         }
+
+        Debug.Log(rb.velocity.magnitude);
     }
 }
