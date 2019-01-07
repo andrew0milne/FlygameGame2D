@@ -5,8 +5,11 @@ using UnityEngine;
 public class Gun : MonoBehaviour
 {
     public float fire_speed;
+    public float beam_active_time;
     public float damage;
     public float range;
+
+    public float line_width;
 
     public Transform fire_pos;
 
@@ -22,17 +25,65 @@ public class Gun : MonoBehaviour
     void Start()
     {
         line = GetComponent<LineRenderer>();
+        line.startWidth = line_width;
+        line.endWidth = line_width;
         sound = GetComponent<AudioSource>();
     }
 
-    void Activate()
+    void Activate(bool b)
     {
-        active = true;
-        
+        active = b;    
     }
-    // TO DO:
-    // MAKE GUN LOOK AND SHOOT AT MOUSE POS
-    void Fire()
+
+    IEnumerator Fire()
+    {
+
+        Vector3 mouse = Input.mousePosition;
+        mouse.z = 20.0f;
+        mouse = Camera.main.ScreenToWorldPoint(mouse);
+
+        RaycastHit hit;
+        Vector3 dir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position - new Vector3(0.0f, 20.0f, 0.0f);
+        
+        Vector3 end_point;
+
+        if (Physics.Raycast(fire_pos.position, dir, out hit, range))
+        {
+            end_point = hit.point;
+        }
+        else
+        {
+            end_point = mouse - fire_pos.transform.position;
+            end_point = end_point.normalized * range;
+
+            end_point = fire_pos.transform.position + end_point;
+        }
+
+
+        float t = 0.0f;
+
+        while (t < beam_active_time)
+        {
+            line.SetPosition(1, end_point);
+
+            line.startWidth = Mathf.Lerp(line_width, 0.0f, t / beam_active_time);
+            line.endWidth = Mathf.Lerp(line_width, 0.0f, t / beam_active_time);
+
+            t += Time.deltaTime;
+
+            yield return null;
+        }
+
+        line.startWidth = line_width;
+        line.endWidth = line_width;
+        line.SetPosition(1, fire_pos.position);
+
+        //active = false;
+
+        yield return null;
+    }
+
+    void FireMain()
     {
         line.enabled = true;
         timer += Time.deltaTime;
@@ -42,30 +93,8 @@ public class Gun : MonoBehaviour
         if (timer > fire_speed)
         {
             sound.Play();
-
-            Vector3 mouse = Input.mousePosition;
-            mouse.z = 20.0f;
-            mouse = Camera.main.ScreenToWorldPoint(mouse);
-
-           // Debug.Log(mouse);
-
-            RaycastHit hit;
-            Vector3 dir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position - new Vector3(0.0f, 20.0f, 0.0f);
-            //Debug.DrawRay(transform.position, Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position - new Vector3(0.0f, 20.0f, 0.0f));
-            if (Physics.Raycast(fire_pos.position, dir, out hit))
-            {
-                line.SetPosition(1, hit.point);
-            }
-            else
-            {
-                line.SetPosition(1, mouse);            
-            }
-
+            StartCoroutine(Fire());
             timer = 0.0f;
-        }
-        else
-        {
-            line.SetPosition(1, fire_pos.position);
         }
 
     }
@@ -75,7 +104,7 @@ public class Gun : MonoBehaviour
     {
         if(active)
         {
-            Fire();
+            FireMain();
         }
         else
         {
@@ -84,6 +113,6 @@ public class Gun : MonoBehaviour
             line.enabled = false;
         }
 
-        active = false;
+        
     }
 }

@@ -189,8 +189,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fire_speed: 0.2
+  beam_active_time: 0.1
   damage: 0
-  range: 5
+  range: 10
+  line_width: 0.05
   fire_pos: {fileID: 3838943610784659053}
 --- !u!82 &602267144
 AudioSource:

@@ -36,6 +36,7 @@ public class Rocket : MonoBehaviour
         rb.velocity = vel;
         target = tar;
         Physics.IgnoreLayerCollision(9, 9);
+        Physics.IgnoreLayerCollision(9, 10);
     }
 
     void Dead()

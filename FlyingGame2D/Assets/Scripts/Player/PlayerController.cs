@@ -71,36 +71,62 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        if (weapon_choice)
-        {
+        //if (weapon_choice)
+        //{
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                FireHeavy();
+            StartCoroutine(FireHeavy());
             }
-            weapon_choise_text.text = "Heavy";
-        }
-        else
-        {
-            if (Input.GetKey(KeyCode.Space))
+            //weapon_choise_text.text = "Heavy";
+        //}
+        //else
+        //{
+            if (Input.GetMouseButtonDown(0))
             {
-                FireGun();
+                FireGun(true);
             }
-            weapon_choise_text.text = "Machine Gun";
-        }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                FireGun(false);
+            }
+
+            //weapon_choise_text.text = "Machine Gun";
+        //}
     }
 
-    void FireHeavy()
+    IEnumerator FireHeavy()
     {
-        GameObject temp_rocket;
-        temp_rocket = Instantiate(heavy_weapon, transform.position + body.transform.forward * 2.0f, body.transform.rotation, null);
-        temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, test);
+        int number_of_rockets = 6;
+
+        for (int i = 0; i < number_of_rockets; i++)
+        {
+            GameObject temp_rocket;
+            Vector3 pos;
+
+            if (i % 2 == 0)
+            {
+                temp_rocket = Instantiate(heavy_weapon, transform.position, body.transform.rotation, null);
+                temp_rocket.transform.Rotate(new Vector3(0.0f, 90.0f));
+            }
+            else
+            {
+                temp_rocket = Instantiate(heavy_weapon, transform.position, body.transform.rotation, null);
+                temp_rocket.transform.Rotate(new Vector3(0.0f, -90.0f));
+            }
+
+            temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, transform.gameObject);
+
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        yield return null;
     }
 
-    void FireGun()
+    void FireGun(bool active)
     {
         foreach(GameObject g in guns)
         {
-            g.SendMessage("Activate");
+            g.SendMessage("Activate", active);
         }
     }
 
