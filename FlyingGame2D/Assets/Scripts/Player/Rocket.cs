@@ -15,27 +15,27 @@ public class Rocket : MonoBehaviour
     Rigidbody rb;
     ParticleSystem ps;
 
-    GameObject target;
+    public GameObject target;
 
     bool dead;
 
-
-
+   
     // Start is called before the first frame update
     void Start()
     {
-        life_time = 0.0f;
         
     }
 
     public void Activate(Vector3 vel, GameObject tar)
     {
+        life_time = 0.0f;
         rb = GetComponent<Rigidbody>();
         ps = GetComponent<ParticleSystem>();
         ps.Play();
         dead = false;
         rb.velocity = vel;
         target = tar;
+        Physics.IgnoreLayerCollision(9, 9);
     }
 
     void Dead()
@@ -76,7 +76,16 @@ public class Rocket : MonoBehaviour
             float angle = Vector3.Angle(rb.velocity, transform.forward);
 
             float pos = 90.0f - Vector3.Angle(transform.right, target.transform.position - transform.position);
-            
+
+            float dist = Vector3.Distance(target.transform.position, transform.position);
+
+            if (dist < 10.0f)
+            {
+                rb.AddForce((10.0f - dist) / 10.0f * -1.0f * rb.velocity);
+                
+            }
+
+
             if (pos > 0.0f)
             {
                 transform.Rotate(transform.up, rotate_speed * Time.deltaTime);
@@ -110,6 +119,6 @@ public class Rocket : MonoBehaviour
             }
         }
 
-        Debug.Log(rb.velocity.magnitude);
+       // Debug.Log(rb.velocity.magnitude);
     }
 }
