@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
                 temp_rocket.transform.Rotate(new Vector3(0.0f, -90.0f));
             }
 
-            temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, transform.gameObject);
+            temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, test);
 
             yield return new WaitForSeconds(0.1f);
         }

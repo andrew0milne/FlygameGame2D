@@ -9,6 +9,7 @@ public class Rocket : MonoBehaviour
     public float max_life_time;
     public float time_until_targetting;
     public float rotate_speed;
+    public float home_in_dist;
     float life_time;
     public Vector3 direction;
 
@@ -19,7 +20,11 @@ public class Rocket : MonoBehaviour
 
     bool dead;
 
-   
+    public List<Transform> obstacles;
+
+    float speed = 10.0f;
+    float acc = 5.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,12 +36,13 @@ public class Rocket : MonoBehaviour
         life_time = 0.0f;
         rb = GetComponent<Rigidbody>();
         ps = GetComponent<ParticleSystem>();
-        ps.Play();
+        
         dead = false;
         rb.velocity = vel;
         target = tar;
         Physics.IgnoreLayerCollision(9, 9);
         Physics.IgnoreLayerCollision(9, 10);
+        obstacles = new List<Transform>();
     }
 
     void Dead()
@@ -53,7 +59,24 @@ public class Rocket : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Dead();       
+        Dead();
+        
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Obstacle")
+        {
+            obstacles.Add(other.transform);
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Obstacle")
+        {
+            obstacles.Remove(other.transform);
+        }
     }
 
     void Move()
@@ -62,7 +85,7 @@ public class Rocket : MonoBehaviour
         {
             if (rb.velocity.magnitude < max_speed)
             {
-                rb.AddForce(transform.forward * acceleration);
+                rb.AddForce(transform.forward * acceleration / 4.0f);
             }
         }
         else
@@ -77,24 +100,102 @@ public class Rocket : MonoBehaviour
             float angle = Vector3.Angle(rb.velocity, transform.forward);
 
             float pos = 90.0f - Vector3.Angle(transform.right, target.transform.position - transform.position);
+           
 
             float dist = Vector3.Distance(target.transform.position, transform.position);
 
-            if (dist < 10.0f)
+            if (dist < home_in_dist)
             {
-                rb.AddForce((10.0f - dist) / 10.0f * -1.0f * rb.velocity);
-                
+                //rb.AddForce((home_in_dist - dist) / home_in_dist * -1.0f * rb.velocity);
+                rotate_speed = 500.0f;
             }
 
+            float pos2 = Vector3.Angle(transform.forward, rb.velocity.normalized);
+
+            if (pos2 > 90.0f)
+            {
+                pos2 = 90.0f;
+            }
 
             if (pos > 0.0f)
             {
                 transform.Rotate(transform.up, rotate_speed * Time.deltaTime);
+                rb.AddForce(transform.right * (pos2 / 90.0f) * -acceleration);
             }
             else if(pos < 0.0f)
             {
                 transform.Rotate(transform.up, -rotate_speed * Time.deltaTime);
-            }    
+                rb.AddForce(transform.right * (pos2 / 90.0f) * acceleration );
+            }
+
+            foreach(Transform tr in obstacles)
+            {
+                float num = 90.0f - Vector3.Angle(transform.right, tr.position - transform.position);
+
+                Vector3 offset = transform.position - tr.position;
+                offset = offset.normalized;
+                rb.AddForce(offset * acceleration / 2.0f);
+                if (num > 0.0f)
+                {
+                    transform.Rotate(transform.up, -rotate_speed * Time.deltaTime);
+                    
+                }
+                else 
+                {
+                    transform.Rotate(transform.up, rotate_speed * Time.deltaTime);
+                }
+            }
+        }
+    }
+
+    void MoveTest()
+    {
+        if (life_time < time_until_targetting)
+        {
+            transform.Translate(Vector3.forward * speed / 2.0f * Time.deltaTime);
+        }
+        else
+        {
+            ps.Play();
+            Vector3 direction = target.transform.position - transform.position + Random.insideUnitSphere;
+            direction.Normalize();
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), 180.0f * Time.deltaTime);
+
+            foreach(Transform tr in obstacles)
+            {
+               
+                float pos = 90.0f - Vector3.Angle(transform.right, tr.position - transform.position);
+
+                float dist = Vector3.Distance(tr.position, transform.position);
+
+                dist = (20.0f - dist) / 20.0f;
+
+                dist = 1.0f;
+
+                if (pos > 0.0f)
+                {
+                    transform.Rotate(transform.up, -rotate_speed * Time.deltaTime * dist);
+
+                }
+                else if (pos < 0.0f)
+                {
+                    transform.Rotate(transform.up, rotate_speed * Time.deltaTime * dist);
+
+                }
+                
+                //Vector3 dir = tr.position - transform.position;// + Random.insideUnitSphere;
+                //dir.Normalize();
+                //transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), -180.0f * Time.deltaTime);
+
+                //Quaternion.ro
+            }
+
+            if (rb.velocity.magnitude < max_speed)
+            {
+                rb.AddForce(transform.forward * 2.0f);
+            }
+
+            transform.Translate(Vector3.forward * speed * Time.deltaTime);
         }
     }
 
@@ -103,7 +204,7 @@ public class Rocket : MonoBehaviour
     {
         if (!dead)
         {
-            Move();
+            MoveTest();
 
             life_time += Time.deltaTime;
 
