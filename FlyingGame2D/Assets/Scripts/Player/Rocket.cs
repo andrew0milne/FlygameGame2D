@@ -150,6 +150,11 @@ public class Rocket : MonoBehaviour
 
     void MoveTest()
     {
+        if (rb.velocity.magnitude < max_speed)
+        {
+            rb.AddForce(transform.forward * 2.0f);
+        }
+
         if (life_time < time_until_targetting)
         {
             transform.Translate(Vector3.forward * speed / 2.0f * Time.deltaTime);
@@ -182,17 +187,6 @@ public class Rocket : MonoBehaviour
                     transform.Rotate(transform.up, rotate_speed * Time.deltaTime * dist);
 
                 }
-                
-                //Vector3 dir = tr.position - transform.position;// + Random.insideUnitSphere;
-                //dir.Normalize();
-                //transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), -180.0f * Time.deltaTime);
-
-                //Quaternion.ro
-            }
-
-            if (rb.velocity.magnitude < max_speed)
-            {
-                rb.AddForce(transform.forward * 2.0f);
             }
 
             transform.Translate(Vector3.forward * speed * Time.deltaTime);
