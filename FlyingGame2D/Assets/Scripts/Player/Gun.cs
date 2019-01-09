@@ -50,6 +50,10 @@ public class Gun : MonoBehaviour
         if (Physics.Raycast(fire_pos.position, dir, out hit, range))
         {
             end_point = hit.point;
+            if(hit.transform.tag == "Enemy")
+            {
+                hit.transform.gameObject.SendMessage("TakeDamage", damage);
+            }
         }
         else
         {

@@ -6,8 +6,9 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
-    public float acceleration = 5.0f;
-    public float max_speed = 3.0f;
+    public float speed = 5.0f;
+    public float acceleration = 2.0f;
+    public float max_speed = 5.0f;
     public GameObject body;
     public GameObject[] guns;
 
@@ -37,7 +38,7 @@ public class PlayerController : MonoBehaviour
 
     void Move()
     {
-
+        transform.Translate(body.transform.forward * speed * Time.deltaTime);
     }
 
     void UserInput()
@@ -61,37 +62,57 @@ public class PlayerController : MonoBehaviour
         trail_em.rateOverTime = 0.0f;
         if (Input.GetKey(KeyCode.W))
         {
-            rb.AddForce(body.transform.forward * acceleration);
+            //rb.AddForce(body.transform.forward * acceleration);
+
+            if (speed < max_speed)
+            {
+                speed += acceleration * Time.deltaTime;
+            }
+
             trail_em.rateOverTime = 100.0f;
         }
+        else
+        {
+            if(speed >= 0.0f)
+            {
+                speed -= acceleration * Time.deltaTime;
+            }
+            else if(speed < 0.0f)
+            {
+                speed = 0.0f;
+            }
+        }
 
-        if(Input.GetKeyDown(KeyCode.E))
+        if(Input.GetKeyDown(KeyCode.A))
+        {
+            rb.AddForce(body.transform.right * -500.0f);
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            rb.AddForce(body.transform.right * 500.0f);
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.E))
         {
             weapon_choice = !weapon_choice;
 
         }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+        StartCoroutine(FireHeavy());
+        }
+      
+        if (Input.GetMouseButtonDown(0))
+        {
+            FireGun(true);
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            FireGun(false);
+        }
 
-        //if (weapon_choice)
-        //{
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-            StartCoroutine(FireHeavy());
-            }
-            //weapon_choise_text.text = "Heavy";
-        //}
-        //else
-        //{
-            if (Input.GetMouseButtonDown(0))
-            {
-                FireGun(true);
-            }
-            else if (Input.GetMouseButtonUp(0))
-            {
-                FireGun(false);
-            }
-
-            //weapon_choise_text.text = "Machine Gun";
-        //}
     }
 
     IEnumerator FireHeavy()
@@ -134,8 +155,9 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         UserInput();
+        Move();
 
-        float pos = 90.0f - Vector3.Angle(transform.right, test.transform.position - transform.position);
+        //float pos = 90.0f - Vector3.Angle(transform.right, test.transform.position - transform.position);
 
         //Debug.Log(pos);
         

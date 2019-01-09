@@ -10,6 +10,11 @@ public class FlockingEnemy : MonoBehaviour
         
     }
 
+    void TakeDamage(float damage)
+    {
+        Destroy(this.gameObject);
+    }
+
     // Update is called once per frame
     void Update()
     {

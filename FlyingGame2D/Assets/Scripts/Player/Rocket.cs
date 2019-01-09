@@ -148,6 +148,11 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    void TakeDamage(float damage)
+    {
+        Dead();
+    }
+
     void MoveTest()
     {
         if (rb.velocity.magnitude < max_speed)
@@ -166,16 +171,37 @@ public class Rocket : MonoBehaviour
             direction.Normalize();
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), 180.0f * Time.deltaTime);
 
-            foreach(Transform tr in obstacles)
+            if (obstacles.Count > 0)
             {
-               
-                float pos = 90.0f - Vector3.Angle(transform.right, tr.position - transform.position);
+                float nearest_obstacle = 10000000.0f;
 
-                float dist = Vector3.Distance(tr.position, transform.position);
+                RaycastHit hit;
 
-                dist = (20.0f - dist) / 20.0f;
+                Vector3 obs = Vector3.zero;
+
+                foreach (Transform tr in obstacles)
+                {
+                    Vector3 dir = tr.position - transform.position;
+                    if (Physics.Raycast(transform.position, dir.normalized, out hit))
+                    {
+                        float d = Vector3.Distance(transform.position, hit.point);
+                        if (d < nearest_obstacle)
+                        {
+                            nearest_obstacle = d;
+                            obs = tr.position;
+                        }
+                    }
+                }
+                
+
+                float pos = 90.0f - Vector3.Angle(transform.right, obs - transform.position);
+
+                float dist = Vector3.Distance(obs, transform.position);
+
+                dist = (18.0f - dist) / 18.0f;
 
                 dist = 1.0f;
+                
 
                 if (pos > 0.0f)
                 {
@@ -187,8 +213,9 @@ public class Rocket : MonoBehaviour
                     transform.Rotate(transform.up, rotate_speed * Time.deltaTime * dist);
 
                 }
-            }
 
+                
+            }
             transform.Translate(Vector3.forward * speed * Time.deltaTime);
         }
     }
