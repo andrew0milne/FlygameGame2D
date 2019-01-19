@@ -225,6 +225,7 @@ MonoBehaviour:
   rotate_speed: 500
   home_in_dist: 4
   direction: {x: 0, y: 0, z: 0}
+  homing: 0
   target: {fileID: 0}
   obstacles: []
 --- !u!199 &4128838872053879189

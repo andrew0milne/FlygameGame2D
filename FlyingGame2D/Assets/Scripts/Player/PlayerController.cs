@@ -19,9 +19,14 @@ public class PlayerController : MonoBehaviour
     ParticleSystem trail;
     ParticleSystem.EmissionModule trail_em;
 
+    LineRenderer laser_target;
+    bool laser_target_found = false;
+
     bool weapon_choice;
 
     public GameObject test;
+
+    Vector3 previous_position;
 
     bool forward_pressed = false;
     Vector3 direction;
@@ -32,10 +37,14 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         weapon_choice = false;
 
+        laser_target = GetComponent<LineRenderer>();
+
         trail = body.GetComponent<ParticleSystem>();
         trail_em = trail.emission;
         trail_em.rateOverTime = 0.0f;
         direction = Vector3.zero;
+       
+        previous_position = transform.position;
     }
 
     void Move()
@@ -48,6 +57,11 @@ public class PlayerController : MonoBehaviour
             }
 
             trail_em.rateOverTime = 100.0f;
+
+            if (rb.velocity.magnitude < max_speed) ;
+            {
+                rb.AddForce(direction * speed);
+            }
         }
         else
         {
@@ -59,27 +73,18 @@ public class PlayerController : MonoBehaviour
             {
                 speed = 0.0f;
             }
+            
         }
-
-        transform.Translate(direction.normalized * speed * Time.deltaTime);
-        rb.velocity = direction.normalized * speed;
+        //rb.velocity = direction.normalized * speed;
+        
+        transform.Translate(direction.normalized * speed * Time.deltaTime);    
     }
 
     void UserInput()
     {
-        //Vector3 mouse = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        //mouse -= new Vector3(0.5f, 0.5f, 0.0f);
-
-        //mouse.z = mouse.y;
-        //mouse.y = 0.0f;
-
-        //mouse = mouse.normalized;
-
         Vector3 mouse = Input.mousePosition;
         mouse.z = 20.0f;
         mouse = Camera.main.ScreenToWorldPoint(mouse);
-
-        //mouse = mouse.normalized;
 
         body.transform.LookAt(mouse);
 
@@ -87,7 +92,8 @@ public class PlayerController : MonoBehaviour
 
         if(Input.GetKeyUp(KeyCode.W))
         {
-            direction = rb.velocity.normalized;
+            direction = transform.position - previous_position;//rb.velocity.normalized;
+            direction = direction.normalized;
             forward_pressed = false;
         }
         else if (Input.GetKey(KeyCode.W))
@@ -117,7 +123,7 @@ public class PlayerController : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
-        StartCoroutine(FireHeavy());
+            StartCoroutine(FireHeavy(test));
         }
       
         if (Input.GetMouseButtonDown(0))
@@ -129,9 +135,42 @@ public class PlayerController : MonoBehaviour
             FireGun(false);
         }
 
+        laser_target.SetPosition(0, transform.position);
+        laser_target.SetPosition(1, transform.position);
+
+        if (Input.GetMouseButton(1))
+        {
+            RaycastHit hit;
+            int layer_mask = ~(1 << LayerMask.NameToLayer("Rocket"));
+
+            if(Physics.Raycast(transform.position, body.transform.forward, out hit, 100.0f, layer_mask))
+            {
+                laser_target.SetPosition(0, hit.point);
+                laser_target_found = true;
+            }
+            else
+            {
+                laser_target_found = false;
+            }
+        }
+        if (Input.GetMouseButtonUp(1))
+        {
+            if (laser_target_found)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, body.transform.forward, out hit))
+                {
+                    if (hit.transform.tag == "Enemy")
+                    {
+                        StartCoroutine(FireHeavy(hit.transform.gameObject));
+                    }
+                }
+            }
+        }
+
     }
 
-    IEnumerator FireHeavy()
+    IEnumerator FireHeavy(GameObject target)
     {
         int number_of_rockets = 6;
 
@@ -151,7 +190,7 @@ public class PlayerController : MonoBehaviour
                 temp_rocket.transform.Rotate(new Vector3(0.0f, -90.0f));
             }
 
-            temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, test);
+            temp_rocket.GetComponent<Rocket>().Activate(rb.velocity, target, true);
 
             yield return new WaitForSeconds(0.1f);
         }
@@ -176,10 +215,10 @@ public class PlayerController : MonoBehaviour
         //float pos = 90.0f - Vector3.Angle(transform.right, test.transform.position - transform.position);
 
         //Debug.Log(pos);
-        
+
         // if object is behind or infornt
         //float pos2 = 90.0f - Vector3.Angle(transform.forward, test.transform.position - transform.position);
 
-       
+        previous_position = transform.position;
     }
 }

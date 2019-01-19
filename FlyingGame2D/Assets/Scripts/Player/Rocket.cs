@@ -13,6 +13,8 @@ public class Rocket : MonoBehaviour
     float life_time;
     public Vector3 direction;
 
+    public bool homing;
+
     Rigidbody rb;
     ParticleSystem ps;
 
@@ -31,7 +33,7 @@ public class Rocket : MonoBehaviour
         
     }
 
-    public void Activate(Vector3 vel, GameObject tar)
+    public void Activate(Vector3 vel, GameObject tar, bool home)
     {
         life_time = 0.0f;
         rb = GetComponent<Rigidbody>();
@@ -43,6 +45,7 @@ public class Rocket : MonoBehaviour
         Physics.IgnoreLayerCollision(9, 9);
         Physics.IgnoreLayerCollision(9, 10);
         obstacles = new List<Transform>();
+        homing = home;
     }
 
     void Dead()
@@ -80,7 +83,7 @@ public class Rocket : MonoBehaviour
     }
 
     // Jancky move that uses mainly physics
-    void Move()
+    void OldMove()
     {
         if (life_time < time_until_targetting)
         {
@@ -156,7 +159,7 @@ public class Rocket : MonoBehaviour
     }
 
     // Much better movement
-    void MoveTest()
+    void HomingMove()
     {
         if (rb.velocity.magnitude < max_speed)
         {
@@ -169,7 +172,10 @@ public class Rocket : MonoBehaviour
         }
         else
         {
-            ps.Play();
+            if (ps.isPlaying == false)
+            {
+                ps.Play();
+            }
             Vector3 direction = target.transform.position - transform.position + Random.insideUnitSphere;
             direction.Normalize();
             transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), 180.0f * Time.deltaTime);
@@ -223,12 +229,28 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    void Move()
+    {
+        if (ps.isPlaying == false)
+        {
+            ps.Play();
+        }
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (!dead)
         {
-            MoveTest();
+            if (homing)
+            {
+                HomingMove();
+            }
+            else
+            {
+                Move();
+            }
 
             life_time += Time.deltaTime;
 
