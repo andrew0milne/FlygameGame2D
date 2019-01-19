@@ -23,7 +23,8 @@ public class PlayerController : MonoBehaviour
 
     public GameObject test;
 
-   
+    bool forward_pressed = false;
+    Vector3 direction;
 
     // Start is called before the first frame update
     void Start()
@@ -34,11 +35,34 @@ public class PlayerController : MonoBehaviour
         trail = body.GetComponent<ParticleSystem>();
         trail_em = trail.emission;
         trail_em.rateOverTime = 0.0f;
+        direction = Vector3.zero;
     }
 
     void Move()
     {
-        transform.Translate(body.transform.forward * speed * Time.deltaTime);
+        if (forward_pressed)
+        {
+            if (speed < max_speed)
+            {
+                speed += acceleration * Time.deltaTime;
+            }
+
+            trail_em.rateOverTime = 100.0f;
+        }
+        else
+        {
+            if (speed >= 0.0f)
+            {
+                speed -= acceleration * Time.deltaTime;
+            }
+            else if (speed < 0.0f)
+            {
+                speed = 0.0f;
+            }
+        }
+
+        transform.Translate(direction.normalized * speed * Time.deltaTime);
+        rb.velocity = direction.normalized * speed;
     }
 
     void UserInput()
@@ -60,28 +84,20 @@ public class PlayerController : MonoBehaviour
         body.transform.LookAt(mouse);
 
         trail_em.rateOverTime = 0.0f;
-        if (Input.GetKey(KeyCode.W))
-        {
-            //rb.AddForce(body.transform.forward * acceleration);
 
-            if (speed < max_speed)
-            {
-                speed += acceleration * Time.deltaTime;
-            }
-
-            trail_em.rateOverTime = 100.0f;
-        }
-        else
+        if(Input.GetKeyUp(KeyCode.W))
         {
-            if(speed >= 0.0f)
-            {
-                speed -= acceleration * Time.deltaTime;
-            }
-            else if(speed < 0.0f)
-            {
-                speed = 0.0f;
-            }
+            direction = rb.velocity.normalized;
+            forward_pressed = false;
         }
+        else if (Input.GetKey(KeyCode.W))
+        {
+            direction = body.transform.forward;
+
+            forward_pressed = true;
+        }
+
+        
 
         if(Input.GetKeyDown(KeyCode.A))
         {

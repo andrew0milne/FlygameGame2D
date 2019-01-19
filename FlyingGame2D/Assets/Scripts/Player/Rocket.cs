@@ -79,6 +79,7 @@ public class Rocket : MonoBehaviour
         }
     }
 
+    // Jancky move that uses mainly physics
     void Move()
     {
         if (life_time < time_until_targetting)
@@ -148,11 +149,13 @@ public class Rocket : MonoBehaviour
         }
     }
 
+
     void TakeDamage(float damage)
     {
         Dead();
     }
 
+    // Much better movement
     void MoveTest()
     {
         if (rb.velocity.magnitude < max_speed)
